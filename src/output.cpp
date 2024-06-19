@@ -327,11 +327,28 @@ static void close_file(channel_t* channel, file_data* fdata) {
                 log(LOG_WARNING, "Problem writing %s (%s)\n", fdata->file_path.c_str(), strerror(errno));
         }
     }
+    
+    timeval current_time;
+    gettimeofday(&current_time, NULL);
+    struct tm* time;
+    if (use_localtime) {
+        time = localtime(&current_time.tv_sec);
+    } else {
+        time = gmtime(&current_time.tv_sec);
+    }
+
+    char end_timestamp[32];
+    if (strftime(end_timestamp, sizeof(end_timestamp), "%H-%M-%S", time) == 0) {
+        log(LOG_NOTICE, "strftime returned 0\n");
+    }
+
+    std::string final_file_path;
+    final_file_path = fdata->file_path.c_str() + " TO " + end_timestamp + fdata->suffix;
 
     if (fdata->f) {
         fclose(fdata->f);
         fdata->f = NULL;
-        rename_if_exists(fdata->file_path_tmp.c_str(), fdata->file_path.c_str());
+        rename_if_exists(fdata->file_path_tmp.c_str(), final_file_path.c_str());
     }
     fdata->file_path.clear();
     fdata->file_path_tmp.clear();
@@ -437,10 +454,10 @@ static bool output_file_ready(channel_t* channel, file_data* fdata, mix_modes mi
     if (fdata->include_freq) {
         ss << ' ' << channel->freqlist[channel->freq_idx].label;
     }
-    ss << ' SRC(' << fdata->basename << ')' << fdata->suffix;
+    ss << ' ' << fdata->basename;
     fdata->file_path = ss.str();
 
-    fdata->file_path_tmp = fdata->file_path + ".tmp";
+    fdata->file_path_tmp = fdata->file_path + ".mp3";
 
     fdata->open_time = fdata->last_write_time = current_time;
 
