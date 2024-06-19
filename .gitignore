@@ -3,4 +3,4 @@ build*/
 .cache
 compile_commands.json
 rtl_airband*.log
-.vscode/
+.vscode
