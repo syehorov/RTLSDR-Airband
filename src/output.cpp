@@ -414,7 +414,7 @@ static bool output_file_ready(channel_t* channel, file_data* fdata, mix_modes mi
     }
 
     char timestamp[32];
-    if (strftime(timestamp, sizeof(timestamp), fdata->split_on_transmission ? "_%Y%m%d_%H%M%S" : "_%Y%m%d_%H", time) == 0) {
+    if (strftime(timestamp, sizeof(timestamp), fdata->split_on_transmission ? "%m-%d-%Y %H-%M-%S" : "%m-%d-%Y %H-%M-%S", time) == 0) {
         log(LOG_NOTICE, "strftime returned 0\n");
         return false;
     }
@@ -433,11 +433,11 @@ static bool output_file_ready(channel_t* channel, file_data* fdata, mix_modes mi
 
     // use a string stream to build the output filepath
     std::stringstream ss;
-    ss << output_dir << '/' << fdata->basename << timestamp;
+    ss << output_dir << '/' << timestamp;
     if (fdata->include_freq) {
-        ss << '_' << channel->freqlist[channel->freq_idx].frequency;
+        ss << ' ' << channel->freqlist[channel->freq_idx].label;
     }
-    ss << fdata->suffix;
+    ss << ' SRC(' << fdata->basename << ')' << fdata->suffix;
     fdata->file_path = ss.str();
 
     fdata->file_path_tmp = fdata->file_path + ".tmp";
