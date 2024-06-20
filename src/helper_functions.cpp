@@ -41,7 +41,7 @@ bool make_dir(const string& dir_path) {
         return true;
     }
 
-    if (mkdir(dir_path.c_str(), 0755) != 0) {
+    if (mkdir(dir_path.c_str(), 0777) != 0) {
         log(LOG_ERR, "Could not create directory %s: %s\n", dir_path.c_str(), strerror(errno));
         return false;
     }
