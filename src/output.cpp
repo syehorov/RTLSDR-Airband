@@ -431,7 +431,7 @@ static bool output_file_ready(channel_t* channel, file_data* fdata, mix_modes mi
     }
 
     char timestamp[32];
-    if (strftime(timestamp, sizeof(timestamp), fdata->split_on_transmission ? "%m-%d-%Y %H-%M-%S" : "%m-%d-%Y %H-%M-%S", time) == 0) {
+    if (strftime(timestamp, sizeof(timestamp), fdata->split_on_transmission ? "%m-%d-%y %H-%M-%S" : "%m-%d-%y %H-%M-%S", time) == 0) {
         log(LOG_NOTICE, "strftime returned 0\n");
         return false;
     }
