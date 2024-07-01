@@ -456,9 +456,8 @@ static bool output_file_ready(channel_t* channel, file_data* fdata, mix_modes mi
     std::stringstream ss;
     ss << output_dir << '/' << fdata->basename;
     //code from sdr++ recorder plugin, I like way it works
-    float float_freq static_cast<float>(channel->freqlist[channel->freq_idx].frequency);
-    time_t now = time(0);
-    tm* ltm = localtime(&now);
+    float float_freq = static_cast<float>(channel->freqlist[channel->freq_idx].frequency);
+
     char freqStr[128];
     char mfreqStr[128];
     char kfreqStr[128];
@@ -472,15 +471,14 @@ static bool output_file_ready(channel_t* channel, file_data* fdata, mix_modes mi
     sprintf(freqStr, "%.0lf", float_freq);
     sprintf(mfreqStr, "%.5lf", float_freq / 1000);
     sprintf(mfreqStr, "%.5lf", float_freq / 1000000);
-    sprintf(hourStr, "%02d", ltm->tm_hour);
-    sprintf(minStr, "%02d", ltm->tm_min);
-    sprintf(secStr, "%02d", ltm->tm_sec);
-    sprintf(dayStr, "%02d", ltm->tm_mday);
-    sprintf(monStr, "%02d", ltm->tm_mon + 1);
-    sprintf(lyearStr, "%02d", ltm->tm_year + 1900);
-    sprintf(syearStr, "%2d", ltm->tm_year - 100); //dirty hack
+    sprintf(hourStr, "%02d", time->tm_hour);
+    sprintf(minStr, "%02d", time->tm_min);
+    sprintf(secStr, "%02d", time->tm_sec);
+    sprintf(dayStr, "%02d", time->tm_mday);
+    sprintf(monStr, "%02d", time->tm_mon + 1);
+    sprintf(lyearStr, "%02d", time->tm_year + 1900);
+    sprintf(syearStr, "%2d", time->tm_year - 100); //dirty hack
     // Replace in template
-    ss = std::regex_replace(ss, std::regex("\\$t"), type);
     ss = std::regex_replace(ss, std::regex("\\$f"), freqStr);
     ss = std::regex_replace(ss, std::regex("\\$kf"), kfreqStr);
     ss = std::regex_replace(ss, std::regex("\\$mf"), mfreqStr);
