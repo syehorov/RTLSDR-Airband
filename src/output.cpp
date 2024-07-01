@@ -456,7 +456,7 @@ static bool output_file_ready(channel_t* channel, file_data* fdata, mix_modes mi
     std::stringstream ss;
     ss << output_dir << '/' << fdata->basename;
     //code from sdr++ recorder plugin, I like way it works
-
+    float float_freq static_cast<float>(channel->freqlist[channel->freq_idx].frequency);
     time_t now = time(0);
     tm* ltm = localtime(&now);
     char freqStr[128];
@@ -469,9 +469,9 @@ static bool output_file_ready(channel_t* channel, file_data* fdata, mix_modes mi
     char monStr[128];
     char lyearStr[128];
     char syearStr[128];
-    sprintf(freqStr, "%.0lf", channel->freqlist[channel->freq_idx].frequency);
-    sprintf(mfreqStr, "%.5lf", channel->freqlist[channel->freq_idx].frequency / 1000);
-    sprintf(mfreqStr, "%.5lf", channel->freqlist[channel->freq_idx].frequency / 1000000);
+    sprintf(freqStr, "%.0lf", float_freq);
+    sprintf(mfreqStr, "%.5lf", float_freq / 1000);
+    sprintf(mfreqStr, "%.5lf", float_freq / 1000000);
     sprintf(hourStr, "%02d", ltm->tm_hour);
     sprintf(minStr, "%02d", ltm->tm_min);
     sprintf(secStr, "%02d", ltm->tm_sec);
