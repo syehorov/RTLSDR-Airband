@@ -48,6 +48,7 @@
 #include <ctime>
 #include <sstream>
 #include <string>
+#include <regex>
 #include "config.h"
 #include "helper_functions.h"
 #include "input-common.h"
@@ -340,10 +341,10 @@ static void close_file(channel_t* channel, file_data* fdata) {
     std::string final_file_path;
     if (fdata->append_end_time) {
         char end_timestamp[32];
-        if (strftime(end_timestamp, sizeof(end_timestamp), fdata->end_timestamp_format, time) == 0) {
+        if (strftime(end_timestamp, sizeof(end_timestamp), fdata->end_timestamp_format.data(), time) == 0) {
             log(LOG_NOTICE, "strftime returned 0\n");
         }
-        final_file_path = fdata->file_path.c_str() + end_timestamp + fdata->suffix;
+        final_file_path = std::string(fdata->file_path.c_str()) + end_timestamp + fdata->suffix;
     } else {
         final_file_path = fdata->file_path.c_str() + fdata->suffix;
     }
@@ -455,6 +456,9 @@ static bool output_file_ready(channel_t* channel, file_data* fdata, mix_modes mi
     std::stringstream ss;
     ss << output_dir << '/' << fdata->basename;
     //code from sdr++ recorder plugin, I like way it works
+
+    time_t now = time(0);
+    tm* ltm = localtime(&now);
     char freqStr[128];
     char mfreqStr[128];
     char kfreqStr[128];
