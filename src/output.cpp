@@ -487,7 +487,6 @@ static bool output_file_ready(channel_t* channel, file_data* fdata, mix_modes mi
     ss = std::regex_replace(ss, std::regex("\\$M"), monStr);
     ss = std::regex_replace(ss, std::regex("\\$Y"), lyearStr);
     ss = std::regex_replace(ss, std::regex("\\$y"), syearStr);
-    ss = std::regex_replace(ss, std::regex("\\$r"), modeStr);
 
     fdata->file_path = ss.str();
 
