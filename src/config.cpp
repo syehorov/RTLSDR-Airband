@@ -115,6 +115,8 @@ static int parse_outputs(libconfig::Setting& outs, channel_t* channel, int i, in
             fdata->continuous = outs[o].exists("continuous") ? (bool)(outs[o]["continuous"]) : false;
             fdata->append = (!outs[o].exists("append")) || (bool)(outs[o]["append"]);
             fdata->split_on_transmission = outs[o].exists("split_on_transmission") ? (bool)(outs[o]["split_on_transmission"]) : false;
+            fdata->append_end_time = outs[o].exists("append_end_time") ? (bool)(outs[o]["append_end_time"]) : false;
+            fdata->end_timestamp_format = outs[o].exists("end_timestamp_format") ? (outs[o]["end_timestamp_format"]) : " TO %H-%M-%S";
             fdata->include_freq = outs[o].exists("include_freq") ? (bool)(outs[o]["include_freq"]) : false;
             channel->need_mp3 = 1;
 
@@ -152,6 +154,8 @@ static int parse_outputs(libconfig::Setting& outs, channel_t* channel, int i, in
             fdata->continuous = outs[o].exists("continuous") ? (bool)(outs[o]["continuous"]) : false;
             fdata->append = (!outs[o].exists("append")) || (bool)(outs[o]["append"]);
             fdata->split_on_transmission = outs[o].exists("split_on_transmission") ? (bool)(outs[o]["split_on_transmission"]) : false;
+            fdata->append_end_time = outs[o].exists("append_end_time") ? (bool)(outs[o]["append_end_time"]) : false;
+            fdata->end_timestamp_format = outs[o].exists("end_timestamp_format") ? (outs[o]["end_timestamp_format"]) : " TO %H-%M-%S";
             fdata->include_freq = outs[o].exists("include_freq") ? (bool)(outs[o]["include_freq"]) : false;
             channel->needs_raw_iq = channel->has_iq_outputs = 1;
 

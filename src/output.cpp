@@ -337,13 +337,16 @@ static void close_file(channel_t* channel, file_data* fdata) {
         time = gmtime(&current_time.tv_sec);
     }
 
-    char end_timestamp[32];
-    if (strftime(end_timestamp, sizeof(end_timestamp), "%H-%M-%S", time) == 0) {
-        log(LOG_NOTICE, "strftime returned 0\n");
-    }
-
     std::string final_file_path;
-    final_file_path = fdata->file_path.c_str() + " TO " + end_timestamp + fdata->suffix;
+    if (fdata->append_end_time) {
+        char end_timestamp[32];
+        if (strftime(end_timestamp, sizeof(end_timestamp), fdata->end_timestamp_format, time) == 0) {
+            log(LOG_NOTICE, "strftime returned 0\n");
+        }
+        final_file_path = fdata->file_path.c_str() + end_timestamp + fdata->suffix;
+    } else {
+        final_file_path = fdata->file_path.c_str() + fdata->suffix;
+    }
 
     if (fdata->f) {
         fclose(fdata->f);
@@ -450,14 +453,45 @@ static bool output_file_ready(channel_t* channel, file_data* fdata, mix_modes mi
 
     // use a string stream to build the output filepath
     std::stringstream ss;
-    ss << output_dir << '/' << timestamp;
-    if (fdata->include_freq) {
-        ss << ' ' << channel->freqlist[channel->freq_idx].label;
-    }
-    ss << ' ' << fdata->basename;
+    ss << output_dir << '/' << fdata->basename;
+    //code from sdr++ recorder plugin, I like way it works
+    char freqStr[128];
+    char mfreqStr[128];
+    char kfreqStr[128];
+    char hourStr[128];
+    char minStr[128];
+    char secStr[128];
+    char dayStr[128];
+    char monStr[128];
+    char lyearStr[128];
+    char syearStr[128];
+    sprintf(freqStr, "%.0lf", channel->freqlist[channel->freq_idx].frequency);
+    sprintf(mfreqStr, "%.5lf", channel->freqlist[channel->freq_idx].frequency / 1000);
+    sprintf(mfreqStr, "%.5lf", channel->freqlist[channel->freq_idx].frequency / 1000000);
+    sprintf(hourStr, "%02d", ltm->tm_hour);
+    sprintf(minStr, "%02d", ltm->tm_min);
+    sprintf(secStr, "%02d", ltm->tm_sec);
+    sprintf(dayStr, "%02d", ltm->tm_mday);
+    sprintf(monStr, "%02d", ltm->tm_mon + 1);
+    sprintf(lyearStr, "%02d", ltm->tm_year + 1900);
+    sprintf(syearStr, "%2d", ltm->tm_year - 100); //dirty hack
+    // Replace in template
+    ss = std::regex_replace(ss, std::regex("\\$t"), type);
+    ss = std::regex_replace(ss, std::regex("\\$f"), freqStr);
+    ss = std::regex_replace(ss, std::regex("\\$kf"), kfreqStr);
+    ss = std::regex_replace(ss, std::regex("\\$mf"), mfreqStr);
+    ss = std::regex_replace(ss, std::regex("\\$h"), hourStr);
+    ss = std::regex_replace(ss, std::regex("\\$m"), minStr);
+    ss = std::regex_replace(ss, std::regex("\\$s"), secStr);
+    ss = std::regex_replace(ss, std::regex("\\$d"), dayStr);
+    ss = std::regex_replace(ss, std::regex("\\$M"), monStr);
+    ss = std::regex_replace(ss, std::regex("\\$Y"), lyearStr);
+    ss = std::regex_replace(ss, std::regex("\\$y"), syearStr);
+    ss = std::regex_replace(ss, std::regex("\\$r"), modeStr);
+
     fdata->file_path = ss.str();
 
-    fdata->file_path_tmp = fdata->file_path + ".mp3";
+    fdata->file_path_tmp = fdata->file_path + ".tmp";
 
     fdata->open_time = fdata->last_write_time = current_time;
 
