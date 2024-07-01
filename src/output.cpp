@@ -455,6 +455,7 @@ static bool output_file_ready(channel_t* channel, file_data* fdata, mix_modes mi
     // use a string stream to build the output filepath
     std::stringstream ss;
     ss << output_dir << '/' << fdata->basename;
+    fdata->file_path = ss.str();
     //code from sdr++ recorder plugin, I like way it works
     float float_freq = static_cast<float>(channel->freqlist[channel->freq_idx].frequency);
 
@@ -479,18 +480,16 @@ static bool output_file_ready(channel_t* channel, file_data* fdata, mix_modes mi
     sprintf(lyearStr, "%02d", time->tm_year + 1900);
     sprintf(syearStr, "%2d", time->tm_year - 100); //dirty hack
     // Replace in template
-    ss = std::regex_replace(ss, std::regex("\\$f"), freqStr);
-    ss = std::regex_replace(ss, std::regex("\\$kf"), kfreqStr);
-    ss = std::regex_replace(ss, std::regex("\\$mf"), mfreqStr);
-    ss = std::regex_replace(ss, std::regex("\\$h"), hourStr);
-    ss = std::regex_replace(ss, std::regex("\\$m"), minStr);
-    ss = std::regex_replace(ss, std::regex("\\$s"), secStr);
-    ss = std::regex_replace(ss, std::regex("\\$d"), dayStr);
-    ss = std::regex_replace(ss, std::regex("\\$M"), monStr);
-    ss = std::regex_replace(ss, std::regex("\\$Y"), lyearStr);
-    ss = std::regex_replace(ss, std::regex("\\$y"), syearStr);
-
-    fdata->file_path = ss.str();
+    fdata->file_path = std::regex_replace(fdata->file_path, std::regex("\\$f"), freqStr);
+    fdata->file_path = std::regex_replace(fdata->file_path, std::regex("\\$kf"), kfreqStr);
+    fdata->file_path = std::regex_replace(fdata->file_path, std::regex("\\$mf"), mfreqStr);
+    fdata->file_path = std::regex_replace(fdata->file_path, std::regex("\\$h"), hourStr);
+    fdata->file_path = std::regex_replace(fdata->file_path, std::regex("\\$m"), minStr);
+    fdata->file_path = std::regex_replace(fdata->file_path, std::regex("\\$s"), secStr);
+    fdata->file_path = std::regex_replace(fdata->file_path, std::regex("\\$d"), dayStr);
+    fdata->file_path = std::regex_replace(fdata->file_path, std::regex("\\$M"), monStr);
+    fdata->file_path = std::regex_replace(fdata->file_path, std::regex("\\$Y"), lyearStr);
+    fdata->file_path = std::regex_replace(fdata->file_path, std::regex("\\$y"), syearStr);
 
     fdata->file_path_tmp = fdata->file_path + ".tmp";
 
