@@ -434,12 +434,6 @@ static bool output_file_ready(channel_t* channel, file_data* fdata, mix_modes mi
         time = gmtime(&current_time.tv_sec);
     }
 
-    char timestamp[32];
-    if (strftime(timestamp, sizeof(timestamp), fdata->split_on_transmission ? "%m-%d-%y %H-%M-%S" : "%m-%d-%y %H-%M-%S", time) == 0) {
-        log(LOG_NOTICE, "strftime returned 0\n");
-        return false;
-    }
-
     std::string output_dir;
     if (fdata->dated_subdirectories) {
         output_dir = make_dated_subdirs(fdata->basedir, time);
