@@ -464,8 +464,8 @@ static bool output_file_ready(channel_t* channel, file_data* fdata, mix_modes mi
     char lyearStr[128];
     char syearStr[128];
     sprintf(freqStr, "%.0lf", float_freq);
-    sprintf(mfreqStr, "%.5lf", float_freq / 1000);
-    sprintf(mfreqStr, "%.5lf", float_freq / 1000000);
+    sprintf(mfreqStr, "%.4lf", float_freq / 1000);
+    sprintf(mfreqStr, "%.4lf", float_freq / 1000000);
     sprintf(hourStr, "%02d", time->tm_hour);
     sprintf(minStr, "%02d", time->tm_min);
     sprintf(secStr, "%02d", time->tm_sec);
@@ -474,16 +474,16 @@ static bool output_file_ready(channel_t* channel, file_data* fdata, mix_modes mi
     sprintf(lyearStr, "%02d", time->tm_year + 1900);
     sprintf(syearStr, "%2d", time->tm_year - 100); //dirty hack
     // Replace in template
-    fdata->file_path = std::regex_replace(fdata->file_path, std::regex("\\$f"), freqStr);
-    fdata->file_path = std::regex_replace(fdata->file_path, std::regex("\\$kf"), kfreqStr);
-    fdata->file_path = std::regex_replace(fdata->file_path, std::regex("\\$mf"), mfreqStr);
-    fdata->file_path = std::regex_replace(fdata->file_path, std::regex("\\$h"), hourStr);
-    fdata->file_path = std::regex_replace(fdata->file_path, std::regex("\\$m"), minStr);
-    fdata->file_path = std::regex_replace(fdata->file_path, std::regex("\\$s"), secStr);
-    fdata->file_path = std::regex_replace(fdata->file_path, std::regex("\\$d"), dayStr);
-    fdata->file_path = std::regex_replace(fdata->file_path, std::regex("\\$M"), monStr);
-    fdata->file_path = std::regex_replace(fdata->file_path, std::regex("\\$Y"), lyearStr);
-    fdata->file_path = std::regex_replace(fdata->file_path, std::regex("\\$y"), syearStr);
+    fdata->file_path = std::regex_replace(fdata->file_path, std::regex("\\%F"), freqStr);
+    fdata->file_path = std::regex_replace(fdata->file_path, std::regex("\\%kF"), kfreqStr);
+    fdata->file_path = std::regex_replace(fdata->file_path, std::regex("\\%mF"), mfreqStr);
+    fdata->file_path = std::regex_replace(fdata->file_path, std::regex("\\%H"), hourStr);
+    fdata->file_path = std::regex_replace(fdata->file_path, std::regex("\\%M"), minStr);
+    fdata->file_path = std::regex_replace(fdata->file_path, std::regex("\\%S"), secStr);
+    fdata->file_path = std::regex_replace(fdata->file_path, std::regex("\\%d"), dayStr);
+    fdata->file_path = std::regex_replace(fdata->file_path, std::regex("\\%m"), monStr);
+    fdata->file_path = std::regex_replace(fdata->file_path, std::regex("\\%Y"), lyearStr);
+    fdata->file_path = std::regex_replace(fdata->file_path, std::regex("\\%y"), syearStr);
 
     fdata->file_path_tmp = fdata->file_path + ".tmp";
 
