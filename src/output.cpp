@@ -476,7 +476,7 @@ static bool output_file_ready(channel_t* channel, file_data* fdata, mix_modes mi
     // Replace in template
     fdata->file_path = std::regex_replace(fdata->file_path, std::regex("\\%F"), freqStr);
     fdata->file_path = std::regex_replace(fdata->file_path, std::regex("\\%kF"), kfreqStr);
-    fdata->file_path = std::regex_replace(fdata->file_path, std::regex("\\%mF"), mfreqStr);
+    fdata->file_path = std::regex_replace(fdata->file_path, std::regex("\\%MF"), mfreqStr);
     fdata->file_path = std::regex_replace(fdata->file_path, std::regex("\\%H"), hourStr);
     fdata->file_path = std::regex_replace(fdata->file_path, std::regex("\\%M"), minStr);
     fdata->file_path = std::regex_replace(fdata->file_path, std::regex("\\%S"), secStr);
