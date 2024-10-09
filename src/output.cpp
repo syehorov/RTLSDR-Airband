@@ -464,7 +464,7 @@ static bool output_file_ready(channel_t* channel, file_data* fdata, mix_modes mi
     char lyearStr[128];
     char syearStr[128];
     sprintf(freqStr, "%.0lf", float_freq);
-    sprintf(mfreqStr, "%.4lf", float_freq / 1000);
+    sprintf(kfreqStr, "%.4lf", float_freq / 1000);
     sprintf(mfreqStr, "%.4lf", float_freq / 1000000);
     sprintf(hourStr, "%02d", time->tm_hour);
     sprintf(minStr, "%02d", time->tm_min);
