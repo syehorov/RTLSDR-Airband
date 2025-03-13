@@ -136,6 +136,7 @@ struct file_data {
     std::string file_path;
     std::string file_path_tmp;
     std::string end_timestamp_format;
+    std::string dated_subdir_format;
     bool dated_subdirectories;
     bool continuous;
     bool append;
