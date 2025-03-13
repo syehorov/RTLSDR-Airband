@@ -4,18 +4,18 @@
  *
  * Copyright (c) 2015-2021 Tomasz Lemiech <szpajder@gmail.com>
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
 #include <assert.h>
@@ -34,6 +34,9 @@ using namespace std;
 static int parse_outputs(libconfig::Setting& outs, channel_t* channel, int i, int j, bool parsing_mixers) {
     int oo = 0;
     for (int o = 0; o < channel->output_count; o++) {
+        channel->outputs[oo].lame = NULL;
+        channel->outputs[oo].lamebuf = NULL;
+
         if (outs[o].exists("disable") && (bool)outs[o]["disable"] == true) {
             continue;
         }
@@ -91,7 +94,9 @@ static int parse_outputs(libconfig::Setting& outs, channel_t* channel, int i, in
                 idata->tls_mode = SHOUT_TLS_DISABLED;
             }
 #endif /* LIBSHOUT_HAS_TLS */
-            channel->need_mp3 = 1;
+
+            channel->outputs[oo].lame = airlame_init(channel->mode, channel->highpass, channel->lowpass);
+            channel->outputs[oo].lamebuf = (unsigned char*)malloc(sizeof(unsigned char) * LAMEBUF_SIZE);
         } else if (!strncmp(outs[o]["type"], "file", 4)) {
             channel->outputs[oo].data = XCALLOC(1, sizeof(struct file_data));
             channel->outputs[oo].type = O_FILE;
@@ -119,7 +124,9 @@ static int parse_outputs(libconfig::Setting& outs, channel_t* channel, int i, in
             fdata->append_end_time = outs[o].exists("append_end_time") ? (bool)(outs[o]["append_end_time"]) : false;
             fdata->end_timestamp_format = outs[o].exists("end_timestamp_format") ? (outs[o]["end_timestamp_format"]) : " TO %H-%M-%S";
             fdata->include_freq = outs[o].exists("include_freq") ? (bool)(outs[o]["include_freq"]) : false;
-            channel->need_mp3 = 1;
+
+            channel->outputs[oo].lame = airlame_init(channel->mode, channel->highpass, channel->lowpass);
+            channel->outputs[oo].lamebuf = (unsigned char*)malloc(sizeof(unsigned char) * LAMEBUF_SIZE);
 
             if (fdata->split_on_transmission) {
                 if (parsing_mixers) {
@@ -322,13 +329,10 @@ static int parse_channels(libconfig::Setting& chans, device_t* dev, int i) {
         }
         channel->axcindicate = NO_SIGNAL;
         channel->mode = MM_MONO;
-        channel->need_mp3 = 0;
         channel->freq_count = 1;
         channel->freq_idx = 0;
         channel->highpass = chans[j].exists("highpass") ? (int)chans[j]["highpass"] : 100;
         channel->lowpass = chans[j].exists("lowpass") ? (int)chans[j]["lowpass"] : 2500;
-        channel->lame = NULL;
-        channel->lamebuf = NULL;
 #ifdef NFM
         channel->pr = 0;
         channel->pj = 0;

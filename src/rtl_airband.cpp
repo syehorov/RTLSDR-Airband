@@ -4,18 +4,18 @@
  * Copyright (c) 2014 Wong Man Hang <microtony@gmail.com>
  * Copyright (c) 2015-2021 Tomasz Lemiech <szpajder@gmail.com>
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "config.h"
@@ -947,10 +947,6 @@ int main(int argc, char* argv[]) {
             continue;  // no inputs connected = no need to initialize output
         }
         channel_t* channel = &mixers[i].channel;
-        if (channel->need_mp3) {
-            channel->lame = airlame_init(mixers[i].channel.mode, mixers[i].channel.highpass, mixers[i].channel.lowpass);
-            channel->lamebuf = (unsigned char*)malloc(sizeof(unsigned char) * LAMEBUF_SIZE);
-        }
         for (int k = 0; k < channel->output_count; k++) {
             output_t* output = channel->outputs + k;
             if (output->type == O_ICECAST) {
@@ -974,12 +970,6 @@ int main(int argc, char* argv[]) {
         for (int j = 0; j < dev->channel_count; j++) {
             channel_t* channel = dev->channels + j;
 
-            // If the channel has icecast or MP3 file output, we will attempt to
-            // initialize a separate LAME context for MP3 encoding.
-            if (channel->need_mp3) {
-                channel->lame = airlame_init(channel->mode, channel->highpass, channel->lowpass);
-                channel->lamebuf = (unsigned char*)malloc(sizeof(unsigned char) * LAMEBUF_SIZE);
-            }
             for (int k = 0; k < channel->output_count; k++) {
                 output_t* output = channel->outputs + k;
                 if (output->type == O_ICECAST) {
@@ -1150,8 +1140,11 @@ int main(int argc, char* argv[]) {
         device_t* dev = devices + i;
         for (int j = 0; j < dev->channel_count; j++) {
             channel_t* channel = dev->channels + j;
-            if (channel->need_mp3 && channel->lame) {
-                lame_close(channel->lame);
+            for (int k = 0; k < channel->output_count; k++) {
+                output_t* output = channel->outputs + k;
+                if (output->lame) {
+                    lame_close(output->lame);
+                }
             }
         }
     }

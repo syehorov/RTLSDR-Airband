@@ -4,18 +4,18 @@
  *
  * Copyright (c) 2015-2021 Tomasz Lemiech <szpajder@gmail.com>
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef _RTL_AIRBAND_H
@@ -186,6 +186,10 @@ struct output_t {
     bool enabled;
     bool active;
     void* data;
+
+    // set if this output performs mp3 encoding
+    lame_t lame;
+    unsigned char* lamebuf;  // temporary buffer used for lame encoding
 };
 
 struct freq_tag {
@@ -253,16 +257,13 @@ struct channel_t {
     struct freq_t* freqlist;
     int freq_count;
     int freq_idx;
-    int need_mp3;
     int needs_raw_iq;
     int has_iq_outputs;
     enum ch_states state;  // mixer channel state flag
     int output_count;
     output_t* outputs;
-    int highpass;            // highpass filter cutoff
-    int lowpass;             // lowpass filter cutoff
-    lame_t lame;             // Context for LAME MP3 encoding if needed
-    unsigned char* lamebuf;  // Buffer used by each lame encode
+    int highpass;  // highpass filter cutoff
+    int lowpass;   // lowpass filter cutoff
 };
 
 enum rec_modes { R_MULTICHANNEL, R_SCAN };
