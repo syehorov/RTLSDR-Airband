@@ -1,9 +1,18 @@
 # RTLSDR-Airband
 
 NOTE: Changes as of origin charlie-foxtrot branch:
- - Changed dated subdirectories format
- - Changed output filename format
- - Removed .tmp suffix for on-going record
+ - Changed dated subdirectories format: use c++ time template format with variable dated_subdir_format (default is "%d-%m-%y")
+ - Changed output filename format: available suffix option "end_timestamp_format" (defaults to " TO %H-%M-%S" - pretend to be ProScan) bunch of options taken from SDR++ code, may be used for suffix and filename_template:
+    "%F" - frequency in Hz
+    "%kF" - frequency in kHz
+    "%MF" - frequency in MHz
+    "%H" - hours
+    "%M" - minutes 
+    "%S" - seconds
+    "%d" - day
+    "%m" - month
+    "%Y" - year in 4-digit format
+    "%y" - last 2 digits of year
 
 NOTE: Changes as of v5.0.0:
  - PRs will be opened directly against `main` and the `unstable` branch will no longer be used
