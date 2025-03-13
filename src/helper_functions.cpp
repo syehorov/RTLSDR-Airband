@@ -72,10 +72,10 @@ bool make_subdirs(const string& basedir, const string& subdirs) {
     return dir_exists(final_path);
 }
 
-string make_dated_subdirs(const string& basedir, const struct tm* time) {
+string make_dated_subdirs(const string& basedir, const string& dated_subdir_format, const struct tm* time) {
     // use the time to build the date subdirectories
     char date_path[11];
-    strftime(date_path, sizeof(date_path), "%m-%d-%y", time);
+    strftime(date_path, sizeof(date_path), dated_subdir_format, time);
     const string date_path_str = string(date_path);
 
     // make all the subdirectories, and return the full path if successful

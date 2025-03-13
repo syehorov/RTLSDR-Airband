@@ -436,7 +436,7 @@ static bool output_file_ready(channel_t* channel, file_data* fdata, mix_modes mi
 
     std::string output_dir;
     if (fdata->dated_subdirectories) {
-        output_dir = make_dated_subdirs(fdata->basedir, time);
+        output_dir = make_dated_subdirs(fdata->basedir, fdata->dated_subdir_format, time);
         if (output_dir.empty()) {
             log(LOG_ERR, "Failed to create dated subdirectory\n");
             return false;

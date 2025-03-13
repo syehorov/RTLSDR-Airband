@@ -110,6 +110,7 @@ static int parse_outputs(libconfig::Setting& outs, channel_t* channel, int i, in
             fdata->basedir = outs[o]["directory"].c_str();
             fdata->basename = outs[o]["filename_template"].c_str();
             fdata->dated_subdirectories = outs[o].exists("dated_subdirectories") ? (bool)(outs[o]["dated_subdirectories"]) : false;
+            fdata->dated_subdir_format = outs[o].exists("dated_subdir_format") ? (outs[o]["dated_subdir_format"]) : "%d-%m-%y";
             fdata->suffix = ".mp3";
 
             fdata->continuous = outs[o].exists("continuous") ? (bool)(outs[o]["continuous"]) : false;
