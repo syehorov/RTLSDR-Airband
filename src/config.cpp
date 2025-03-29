@@ -125,6 +125,9 @@ static int parse_outputs(libconfig::Setting& outs, channel_t* channel, int i, in
             fdata->append_end_time = outs[o].exists("append_end_time") ? (bool)(outs[o]["append_end_time"]) : false;
             fdata->end_timestamp_format = outs[o].exists("end_timestamp_format") ? (outs[o]["end_timestamp_format"]) : " TO %H-%M-%S";
             fdata->include_freq = outs[o].exists("include_freq") ? (bool)(outs[o]["include_freq"]) : false;
+            fdata->min_rec_length = outs[o].exists("min_rec_length") ? (float)(outs[o]["min_rec_length"]) : 1.0;
+            fdata->max_rec_length = outs[o].exists("max_rec_length") ? (float)(outs[o]["max_rec_length"]) : 3600.0;
+            fdata->max_idle_length = outs[o].exists("max_idle_length") ? (float)(outs[o]["max_idle_length"]) : 0.5;
 
             channel->outputs[oo].has_mp3_output = true;
 
