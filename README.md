@@ -13,7 +13,7 @@ NOTE: Changes as of origin charlie-foxtrot branch:
     - "%m" - month
     - "%Y" - year in 4-digit format
     - "%y" - last 2 digits of year
-    
+
 Changes as of v5.1.0:
  - License is now GPLv2 [#503](https://github.com/rtl-airband/RTLSDR-Airband/discussions/503)
 
