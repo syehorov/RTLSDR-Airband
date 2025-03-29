@@ -40,10 +40,12 @@ bool make_dir(const string& dir_path) {
     if (dir_exists(dir_path)) {
         return true;
     }
-
-    if (mkdir(dir_path.c_str(), 0755) != 0) {
+    
+    if (mkdir(dir_path.c_str(), 0777) != 0) {
         log(LOG_ERR, "Could not create directory %s: %s\n", dir_path.c_str(), strerror(errno));
         return false;
+    } else {
+        chmod(dir_path.c_str(), 0777);
     }
     return true;
 }
@@ -70,10 +72,11 @@ bool make_subdirs(const string& basedir, const string& subdirs) {
     return dir_exists(final_path);
 }
 
-string make_dated_subdirs(const string& basedir, const struct tm* time) {
+string make_dated_subdirs(const string& basedir, const string& dated_subdir_format, const struct tm* time) {
     // use the time to build the date subdirectories
+    const char* d_format = dated_subdir_format.c_str();
     char date_path[11];
-    strftime(date_path, sizeof(date_path), "%Y/%m/%d", time);
+    strftime(date_path, sizeof(date_path), d_format, time);
     const string date_path_str = string(date_path);
 
     // make all the subdirectories, and return the full path if successful

@@ -1,7 +1,3 @@
 {
-    "editor.formatOnPaste": true,
-    "editor.formatOnSave": true,
-    "editor.formatOnType": true,
-    "editor.defaultFormatter": "xaver.clang-format",
-    "clang-format.executable": "clang-format-14"
+    "cmake.configureOnOpen": false
 }

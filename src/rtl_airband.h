@@ -135,10 +135,13 @@ struct file_data {
     std::string suffix;
     std::string file_path;
     std::string file_path_tmp;
+    std::string end_timestamp_format;
+    std::string dated_subdir_format;
     bool dated_subdirectories;
     bool continuous;
     bool append;
     bool split_on_transmission;
+    bool append_end_time;
     bool include_freq;
     timeval open_time;
     timeval last_write_time;
@@ -183,7 +186,6 @@ struct output_t {
     bool enabled;
     bool active;
     void* data;
-
     // set to true in order to initialize `lame` and `lamebuf` after config parsing
     // is complete
     bool has_mp3_output;

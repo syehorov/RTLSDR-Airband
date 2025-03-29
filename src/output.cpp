@@ -47,6 +47,7 @@
 #include <ctime>
 #include <sstream>
 #include <string>
+#include <regex>
 #include "config.h"
 #include "helper_functions.h"
 #include "input-common.h"
@@ -333,11 +334,31 @@ static void close_file(output_t* output) {
         fseek(fdata->f, 0, SEEK_SET);
         fwrite(output->lamebuf, 1, lametag_size, fdata->f);
     }
+    
+    timeval current_time;
+    gettimeofday(&current_time, NULL);
+    struct tm* time;
+    if (use_localtime) {
+        time = localtime(&current_time.tv_sec);
+    } else {
+        time = gmtime(&current_time.tv_sec);
+    }
+
+    std::string final_file_path;
+    if (fdata->append_end_time) {
+        char end_timestamp[32];
+        if (strftime(end_timestamp, sizeof(end_timestamp), fdata->end_timestamp_format.data(), time) == 0) {
+            log(LOG_NOTICE, "strftime returned 0\n");
+        }
+        final_file_path = std::string(fdata->file_path.c_str()) + end_timestamp + fdata->suffix;
+    } else {
+        final_file_path = fdata->file_path.c_str() + fdata->suffix;
+    }
 
     if (fdata->f) {
         fclose(fdata->f);
         fdata->f = NULL;
-        rename_if_exists(fdata->file_path_tmp.c_str(), fdata->file_path.c_str());
+        rename_if_exists(fdata->file_path_tmp.c_str(), final_file_path.c_str());
     }
     fdata->file_path.clear();
     fdata->file_path_tmp.clear();
@@ -422,15 +443,9 @@ static bool output_file_ready(channel_t* channel, output_t* output) {
         time = gmtime(&current_time.tv_sec);
     }
 
-    char timestamp[32];
-    if (strftime(timestamp, sizeof(timestamp), fdata->split_on_transmission ? "_%Y%m%d_%H%M%S" : "_%Y%m%d_%H", time) == 0) {
-        log(LOG_NOTICE, "strftime returned 0\n");
-        return false;
-    }
-
     std::string output_dir;
     if (fdata->dated_subdirectories) {
-        output_dir = make_dated_subdirs(fdata->basedir, time);
+        output_dir = make_dated_subdirs(fdata->basedir, fdata->dated_subdir_format, time);
         if (output_dir.empty()) {
             log(LOG_ERR, "Failed to create dated subdirectory\n");
             return false;
@@ -442,12 +457,42 @@ static bool output_file_ready(channel_t* channel, output_t* output) {
 
     // use a string stream to build the output filepath
     std::stringstream ss;
-    ss << output_dir << '/' << fdata->basename << timestamp;
-    if (fdata->include_freq) {
-        ss << '_' << channel->freqlist[channel->freq_idx].frequency;
-    }
-    ss << fdata->suffix;
+    ss << output_dir << '/' << fdata->basename;
     fdata->file_path = ss.str();
+    //code from sdr++ recorder plugin, I like way it works
+    float float_freq = static_cast<float>(channel->freqlist[channel->freq_idx].frequency);
+
+    char freqStr[128];
+    char mfreqStr[128];
+    char kfreqStr[128];
+    char hourStr[128];
+    char minStr[128];
+    char secStr[128];
+    char dayStr[128];
+    char monStr[128];
+    char lyearStr[128];
+    char syearStr[128];
+    sprintf(freqStr, "%.0lf", float_freq);
+    sprintf(kfreqStr, "%.4lf", float_freq / 1000);
+    sprintf(mfreqStr, "%.4lf", float_freq / 1000000);
+    sprintf(hourStr, "%02d", time->tm_hour);
+    sprintf(minStr, "%02d", time->tm_min);
+    sprintf(secStr, "%02d", time->tm_sec);
+    sprintf(dayStr, "%02d", time->tm_mday);
+    sprintf(monStr, "%02d", time->tm_mon + 1);
+    sprintf(lyearStr, "%02d", time->tm_year + 1900);
+    sprintf(syearStr, "%2d", time->tm_year - 100); //dirty hack
+    // Replace in template
+    fdata->file_path = std::regex_replace(fdata->file_path, std::regex("\\%F"), freqStr);
+    fdata->file_path = std::regex_replace(fdata->file_path, std::regex("\\%kF"), kfreqStr);
+    fdata->file_path = std::regex_replace(fdata->file_path, std::regex("\\%MF"), mfreqStr);
+    fdata->file_path = std::regex_replace(fdata->file_path, std::regex("\\%H"), hourStr);
+    fdata->file_path = std::regex_replace(fdata->file_path, std::regex("\\%M"), minStr);
+    fdata->file_path = std::regex_replace(fdata->file_path, std::regex("\\%S"), secStr);
+    fdata->file_path = std::regex_replace(fdata->file_path, std::regex("\\%d"), dayStr);
+    fdata->file_path = std::regex_replace(fdata->file_path, std::regex("\\%m"), monStr);
+    fdata->file_path = std::regex_replace(fdata->file_path, std::regex("\\%Y"), lyearStr);
+    fdata->file_path = std::regex_replace(fdata->file_path, std::regex("\\%y"), syearStr);
 
     fdata->file_path_tmp = fdata->file_path + ".tmp";
 

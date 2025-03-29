@@ -1,9 +1,18 @@
 # RTLSDR-Airband
 
-![main](https://github.com/rtl-airband/RTLSDR-Airband/actions/workflows/ci_build.yml/badge.svg?branch=main)
-![main](https://github.com/rtl-airband/RTLSDR-Airband/actions/workflows/platform_build.yml/badge.svg?branch=main)
-![main](https://github.com/rtl-airband/RTLSDR-Airband/actions/workflows/build_docker_containers.yml/badge.svg?branch=main)
-![main](https://github.com/rtl-airband/RTLSDR-Airband/actions/workflows/code_formatting.yml/badge.svg?branch=main)
+NOTE: Changes as of origin charlie-foxtrot branch:
+ - Changed dated subdirectories format: use c++ time template format with variable dated_subdir_format (default is "%d-%m-%y")
+ - Changed output filename format: available suffix option "end_timestamp_format" (defaults to " TO %H-%M-%S" - pretend to be ProScan) bunch of options taken from SDR++ code, may be used for suffix and filename_template:
+    - "%F" - frequency in Hz
+    - "%kF" - frequency in kHz
+    - "%MF" - frequency in MHz
+    - "%H" - hours
+    - "%M" - minutes 
+    - "%S" - seconds
+    - "%d" - day
+    - "%m" - month
+    - "%Y" - year in 4-digit format
+    - "%y" - last 2 digits of year
 
 Changes as of v5.1.0:
  - License is now GPLv2 [#503](https://github.com/rtl-airband/RTLSDR-Airband/discussions/503)

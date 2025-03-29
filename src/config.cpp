@@ -97,6 +97,7 @@ static int parse_outputs(libconfig::Setting& outs, channel_t* channel, int i, in
 #endif /* LIBSHOUT_HAS_TLS */
 
             channel->outputs[oo].has_mp3_output = true;
+
         } else if (!strncmp(outs[o]["type"], "file", 4)) {
             channel->outputs[oo].data = XCALLOC(1, sizeof(struct file_data));
             channel->outputs[oo].type = O_FILE;
@@ -115,14 +116,18 @@ static int parse_outputs(libconfig::Setting& outs, channel_t* channel, int i, in
             fdata->basedir = outs[o]["directory"].c_str();
             fdata->basename = outs[o]["filename_template"].c_str();
             fdata->dated_subdirectories = outs[o].exists("dated_subdirectories") ? (bool)(outs[o]["dated_subdirectories"]) : false;
+            fdata->dated_subdir_format = outs[o].exists("dated_subdir_format") ? (outs[o]["dated_subdir_format"]) : "%d-%m-%y";
             fdata->suffix = ".mp3";
 
             fdata->continuous = outs[o].exists("continuous") ? (bool)(outs[o]["continuous"]) : false;
             fdata->append = (!outs[o].exists("append")) || (bool)(outs[o]["append"]);
             fdata->split_on_transmission = outs[o].exists("split_on_transmission") ? (bool)(outs[o]["split_on_transmission"]) : false;
+            fdata->append_end_time = outs[o].exists("append_end_time") ? (bool)(outs[o]["append_end_time"]) : false;
+            fdata->end_timestamp_format = outs[o].exists("end_timestamp_format") ? (outs[o]["end_timestamp_format"]) : " TO %H-%M-%S";
             fdata->include_freq = outs[o].exists("include_freq") ? (bool)(outs[o]["include_freq"]) : false;
 
             channel->outputs[oo].has_mp3_output = true;
+
 
             if (fdata->split_on_transmission) {
                 if (parsing_mixers) {
@@ -153,11 +158,14 @@ static int parse_outputs(libconfig::Setting& outs, channel_t* channel, int i, in
             fdata->basedir = outs[o]["directory"].c_str();
             fdata->basename = outs[o]["filename_template"].c_str();
             fdata->dated_subdirectories = outs[o].exists("dated_subdirectories") ? (bool)(outs[o]["dated_subdirectories"]) : false;
+            fdata->dated_subdir_format = outs[o].exists("dated_subdir_format") ? (outs[o]["dated_subdir_format"]) : "%d-%m-%y";
             fdata->suffix = ".cf32";
 
             fdata->continuous = outs[o].exists("continuous") ? (bool)(outs[o]["continuous"]) : false;
             fdata->append = (!outs[o].exists("append")) || (bool)(outs[o]["append"]);
             fdata->split_on_transmission = outs[o].exists("split_on_transmission") ? (bool)(outs[o]["split_on_transmission"]) : false;
+            fdata->append_end_time = outs[o].exists("append_end_time") ? (bool)(outs[o]["append_end_time"]) : false;
+            fdata->end_timestamp_format = outs[o].exists("end_timestamp_format") ? (outs[o]["end_timestamp_format"]) : " TO %H-%M-%S";
             fdata->include_freq = outs[o].exists("include_freq") ? (bool)(outs[o]["include_freq"]) : false;
             channel->needs_raw_iq = channel->has_iq_outputs = 1;
 
