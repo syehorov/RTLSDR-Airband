@@ -356,10 +356,16 @@ static void close_file(output_t* output) {
         final_file_path = fdata->file_path.c_str() + fdata->suffix;
     }
 
+    double record_duration_sec = delta_sec(&fdata->open_time, &fdata->last_write_time);
+
     if (fdata->f) {
         fclose(fdata->f);
         fdata->f = NULL;
-        rename_if_exists(fdata->file_path_tmp.c_str(), final_file_path.c_str());
+        if(record_duration_sec < fdata->min_rec_length && fdata->delete_short_records) {
+            remove(fdata->file_path_tmp.c_str());
+        } else {
+            rename_if_exists(fdata->file_path_tmp.c_str(), final_file_path.c_str());
+        }
     }
     fdata->file_path.clear();
     fdata->file_path_tmp.clear();

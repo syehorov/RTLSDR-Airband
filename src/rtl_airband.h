@@ -144,6 +144,7 @@ struct file_data {
     bool split_on_transmission;
     bool append_end_time;
     bool include_freq;
+    bool delete_short_records;
     timeval open_time;
     timeval last_write_time;
     FILE* f;
