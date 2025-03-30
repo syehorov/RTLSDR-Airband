@@ -362,6 +362,7 @@ static void close_file(output_t* output) {
         fclose(fdata->f);
         fdata->f = NULL;
         if(record_duration_sec < fdata->min_rec_length && fdata->delete_short_records) {
+            log(LOG_WARNING, "Too short record: %llu sec, removing\n", (unsigned long long)record_duration_sec);
             remove(fdata->file_path_tmp.c_str());
         } else {
             rename_if_exists(fdata->file_path_tmp.c_str(), final_file_path.c_str());
