@@ -66,14 +66,15 @@
 
 #ifdef NFM
 #define WAVE_RATE 16000
+#define MP3_RATE 16000
 #else
 #define WAVE_RATE 8000
+#define MP3_RATE 8000
 #endif /* NFM */
 
 #define WAVE_BATCH WAVE_RATE / 8
 #define AGC_EXTRA 100
 #define WAVE_LEN 2 * WAVE_BATCH + AGC_EXTRA
-#define MP3_RATE 8000
 #define MAX_SHOUT_QUEUELEN 32768
 #define TAG_QUEUE_LEN 16
 
@@ -81,7 +82,7 @@
 #define DEFAULT_FFT_SIZE_LOG 9
 #define MAX_FFT_SIZE_LOG 13
 
-#define LAMEBUF_SIZE 22000  // todo: calculate
+#define LAMEBUF_SIZE 34762  // todo: calculate
 #define MIX_DIVISOR 2
 
 #ifdef WITH_BCM_VC
@@ -143,10 +144,14 @@ struct file_data {
     bool split_on_transmission;
     bool append_end_time;
     bool include_freq;
+    bool delete_short_records;
     timeval open_time;
     timeval last_write_time;
     FILE* f;
     enum output_type type;
+    float max_rec_length;
+    float min_rec_length;
+    float max_idle_length;
 };
 
 struct udp_stream_data {

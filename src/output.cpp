@@ -155,10 +155,11 @@ lame_t airlame_init(mix_modes mixmode, int highpass, int lowpass) {
     lame_set_in_samplerate(lame, WAVE_RATE);
     lame_set_VBR(lame, vbr_mtrh);
     lame_set_brate(lame, 16);
-    lame_set_quality(lame, 7);
+    lame_set_quality(lame, 2);
     lame_set_lowpassfreq(lame, lowpass);
     lame_set_highpassfreq(lame, highpass);
     lame_set_out_samplerate(lame, MP3_RATE);
+    lame_set_exp_nspsytune(lame, 1);
     if (mixmode == MM_STEREO) {
         lame_set_num_channels(lame, 2);
         lame_set_mode(lame, JOINT_STEREO);
@@ -355,10 +356,17 @@ static void close_file(output_t* output) {
         final_file_path = fdata->file_path.c_str() + fdata->suffix;
     }
 
+    double record_duration_sec = delta_sec(&fdata->open_time, &fdata->last_write_time);
+
     if (fdata->f) {
         fclose(fdata->f);
         fdata->f = NULL;
-        rename_if_exists(fdata->file_path_tmp.c_str(), final_file_path.c_str());
+        if(record_duration_sec < fdata->min_rec_length && fdata->delete_short_records) {
+            log(LOG_WARNING, "Too short record: %llu sec, removing\n", (unsigned long long)record_duration_sec);
+            remove(fdata->file_path_tmp.c_str());
+        } else {
+            rename_if_exists(fdata->file_path_tmp.c_str(), final_file_path.c_str());
+        }
     }
     fdata->file_path.clear();
     fdata->file_path_tmp.clear();
@@ -374,10 +382,6 @@ static void close_file(output_t* output) {
 static void close_if_necessary(output_t* output) {
     file_data* fdata = (file_data*)(output->data);
 
-    static const double MIN_TRANSMISSION_TIME_SEC = 1.0;
-    static const double MAX_TRANSMISSION_TIME_SEC = 60.0 * 60.0;
-    static const double MAX_TRANSMISSION_IDLE_SEC = 0.5;
-
     if (!fdata || !fdata->f) {
         return;
     }
@@ -389,7 +393,7 @@ static void close_if_necessary(output_t* output) {
         double duration_sec = delta_sec(&fdata->open_time, &current_time);
         double idle_sec = delta_sec(&fdata->last_write_time, &current_time);
 
-        if (duration_sec > MAX_TRANSMISSION_TIME_SEC || (duration_sec > MIN_TRANSMISSION_TIME_SEC && idle_sec > MAX_TRANSMISSION_IDLE_SEC)) {
+        if (duration_sec > fdata->max_rec_length || (duration_sec > fdata->min_rec_length && idle_sec > fdata->max_idle_length)) {
             debug_print("closing file %s, duration %f sec, idle %f sec\n", fdata->file_path.c_str(), duration_sec, idle_sec);
             close_file(output);
         }

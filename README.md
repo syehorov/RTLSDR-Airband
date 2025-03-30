@@ -1,6 +1,11 @@
 # RTLSDR-Airband
 
 NOTE: Changes as of upstream:
+ - New configuration options for file output:
+    - float min_rec_length - minimal record length (seconds), default to 1.0
+    - float max_rec_length - maximum record length (seconds), default to 3600.0 (1 hour)
+    - float max_idle_length - maximum idle length (seconds), default to 0.5
+    - boolean delete_short_records - delete file, if record is shorter than min_rec_length
  - Changed dated subdirectories format: use c++ time template format with variable dated_subdir_format (default is "%d-%m-%y")
  - Changed output filename format: available suffix option "end_timestamp_format" (defaults to " TO %H-%M-%S" - pretend to be ProScan) bunch of options taken from SDR++ code, may be used for suffix and filename_template:
     - "%F" - frequency in Hz
