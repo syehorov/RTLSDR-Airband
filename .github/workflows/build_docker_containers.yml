@@ -2,12 +2,12 @@ name: Build and Publish Containers
 
 on:
   push:
-    branches: [main, unstable]
+#    branches: [main, unstable]
     tags: ['v*']
   pull_request:
   workflow_dispatch:
-#   schedule:
-#     - cron: '29 13 * * *' # run daily
+#  schedule:
+#    - cron: '29 13 * * *' # run daily
 
 jobs:
   build_docker_containers:

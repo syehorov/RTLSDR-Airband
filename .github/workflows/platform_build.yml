@@ -2,12 +2,12 @@ name: Platform Build
 
 on:
   push:
-    branches: [main]
+#    branches: [main]
     tags: ['v*']
   pull_request:
   workflow_dispatch:
-#   schedule:
-#     - cron: '39 13 * * *' # run daily
+#  schedule:
+#    - cron: '39 13 * * *' # run daily
 
 jobs:
   platform_build:

@@ -6,8 +6,8 @@ on:
     tags: ['v*']
   pull_request:
   workflow_dispatch:
-#   schedule:
-#     - cron: '39 13 * * *' # run daily
+#  schedule:
+#    - cron: '39 13 * * *' # run daily
 
 jobs:
   ci_build:
