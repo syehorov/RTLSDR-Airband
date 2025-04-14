@@ -362,7 +362,7 @@ static void close_file(output_t* output) {
         fclose(fdata->f);
         fdata->f = NULL;
         if(record_duration_sec < fdata->min_rec_length && fdata->delete_short_records) {
-            log(LOG_WARNING, "Too short record: %llu sec, removing\n", (unsigned long long)record_duration_sec);
+            log(LOG_WARNING, "%.4lf MHz too short record: %llu sec, removing\n", fdata->frequency / 1000000.0, (unsigned long long)record_duration_sec);
             remove(fdata->file_path_tmp.c_str());
         } else {
             rename_if_exists(fdata->file_path_tmp.c_str(), final_file_path.c_str());
@@ -463,8 +463,9 @@ static bool output_file_ready(channel_t* channel, output_t* output) {
     std::stringstream ss;
     ss << output_dir << '/' << fdata->basename;
     fdata->file_path = ss.str();
-    //code from sdr++ recorder plugin, I like way it works
+    //code from sdr++ recorder plugin, I like the way it works
     float float_freq = static_cast<float>(channel->freqlist[channel->freq_idx].frequency);
+    fdata->frequency = channel->freqlist[channel->freq_idx].frequency;
 
     char freqStr[128];
     char mfreqStr[128];
@@ -551,7 +552,7 @@ void process_outputs(channel_t* channel, int cur_scan_freq) {
                         log(LOG_WARNING, "Failed to add shout metadata\n");
                     }
                 } else {
-                    snprintf(description, sizeof(description), "%.3f MHz", channel->freqlist[channel->freq_idx].frequency / 1000000.0);
+                    snprintf(description, sizeof(description), "%.4f MHz", channel->freqlist[channel->freq_idx].frequency / 1000000.0);
                     if (shout_metadata_add(meta, "song", description) != SHOUTERR_SUCCESS) {
                         log(LOG_WARNING, "Failed to add shout metadata\n");
                     }
