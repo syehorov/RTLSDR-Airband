@@ -152,6 +152,7 @@ struct file_data {
     float max_rec_length;
     float min_rec_length;
     float max_idle_length;
+    int frequency;
 };
 
 struct udp_stream_data {
