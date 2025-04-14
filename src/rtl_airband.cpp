@@ -56,6 +56,13 @@
 #include <ctime>
 #include <iostream>
 #include <libconfig.h++>
+#include <unistd.h>
+#include <fcntl.h>
+#include <pthread.h>
+#include <errno.h>
+#include <poll.h>
+#include <sys/stat.h>
+#include <string.h>
 #include "input-common.h"
 #include "logging.h"
 #include "rtl_airband.h"
@@ -79,9 +86,15 @@ bool use_localtime = false;
 bool multiple_demod_threads = false;
 bool multiple_output_threads = false;
 bool log_scan_activity = false;
+char* global_control_path = NULL;
 char* stats_filepath = NULL;
 size_t fft_size_log = DEFAULT_FFT_SIZE_LOG;
 size_t fft_size = 1 << fft_size_log;
+
+#define MAX_LOCKED_FREQS 256
+static double locked_freqs[MAX_LOCKED_FREQS];
+static int locked_freqs_count = 0;
+static pthread_mutex_t lock_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 #ifdef NFM
 float alpha = exp(-1.0f / (WAVE_RATE * 2e-4));
@@ -98,6 +111,136 @@ void sighandler(int sig) {
     do_exit = 1;
 }
 
+int is_locked(double freq_mhz) {
+    pthread_mutex_lock(&lock_mutex);
+    for (int i = 0; i < locked_freqs_count; i++) {
+        if (fabs(locked_freqs[i] - freq_mhz) < 0.001) {
+            pthread_mutex_unlock(&lock_mutex);
+            return 1;
+        }
+    }
+    pthread_mutex_unlock(&lock_mutex);
+    return 0;
+}
+
+void lock_freq(double freq_mhz) {
+    pthread_mutex_lock(&lock_mutex);
+
+    int already_locked = 0;
+    for (int i = 0; i < locked_freqs_count; i++) {
+        if (fabs(locked_freqs[i] - freq_mhz) < 0.001) {
+            already_locked = 1;
+            break;
+        }
+    }
+
+    if (!already_locked) {
+        if (locked_freqs_count < MAX_LOCKED_FREQS) {
+            locked_freqs[locked_freqs_count++] = freq_mhz;
+            log(LOG_INFO, "[lock] Frequency %.3f MHz has been locked\n", freq_mhz);
+        } else {
+            log(LOG_WARNING, "[lock] Cannot lock %.3f MHz — lock table is full\n", freq_mhz);
+        }
+    } else {
+        log(LOG_DEBUG, "[lock] Frequency %.3f MHz was already locked\n", freq_mhz);
+    }
+
+    pthread_mutex_unlock(&lock_mutex);
+}
+
+void unlock_freq(double freq_mhz) {
+    pthread_mutex_lock(&lock_mutex);
+    int found = 0;
+    for (int i = 0; i < locked_freqs_count; i++) {
+        if (fabs(locked_freqs[i] - freq_mhz) < 0.001) {
+            for (int j = i; j < locked_freqs_count - 1; j++)
+                locked_freqs[j] = locked_freqs[j + 1];
+            locked_freqs_count--;
+            found = 1;
+            log(LOG_INFO, "[unlock] Frequency %.3f MHz has been unlocked\n", freq_mhz);
+            break;
+        }
+    }
+    if (!found) {
+        log(LOG_DEBUG, "[unlock] Frequency %.3f MHz was not locked\n", freq_mhz);
+    }
+    pthread_mutex_unlock(&lock_mutex);
+}
+
+void* command_listener(void* path_str) {
+    const char* fifo_path = (const char*)path_str;
+
+    log(LOG_INFO, "[control] Opening FIFO: %s\n", fifo_path);
+
+    // Створення FIFO, якщо його не існує
+    struct stat st;
+    if (stat(fifo_path, &st) == -1) {
+        mode_t old_umask = umask(0);
+        if (mkfifo(fifo_path, 0660) == -1) {
+            umask(old_umask);
+            log(LOG_ERR, "[control] Failed to create FIFO %s: %s\n", fifo_path, strerror(errno));
+            return NULL;
+        }
+        umask(old_umask);
+        log(LOG_INFO, "[control] Created FIFO %s with 0660\n", fifo_path);
+    } else if (!S_ISFIFO(st.st_mode)) {
+        log(LOG_ERR, "[control] %s exists but is not a FIFO\n", fifo_path);
+        return NULL;
+    }
+
+    int fd = open(fifo_path, O_RDONLY | O_NONBLOCK);
+    if (fd < 0) {
+        log(LOG_ERR, "[control] Failed to open FIFO %s: %s\n", fifo_path, strerror(errno));
+        return NULL;
+    }
+    log(LOG_INFO, "[control] FIFO opened for reading");
+
+    int dummy_fd = open(fifo_path, O_WRONLY | O_NONBLOCK);
+    if (dummy_fd < 0) {
+        log(LOG_WARNING, "[control] Dummy writer failed: %s\n", strerror(errno));
+    } else {
+        log(LOG_INFO, "[control] Dummy writer opened to keep FIFO write-ready\n");
+    }
+
+    char buf[256];
+    while (!do_exit) {
+        struct pollfd pfd = {fd, POLLIN, 0};
+        if (poll(&pfd, 1, 500) <= 0)
+            continue;
+
+        ssize_t len = read(fd, buf, sizeof(buf) - 1);
+        if (len <= 0)
+            continue;
+
+        buf[len] = '\0';
+        char* nl = strchr(buf, '\n');
+        if (nl) *nl = '\0';
+
+        log(LOG_INFO, "[control] Read %zd bytes: '%s'\n", len, buf);
+
+        char cmd[16];
+        double freq;
+        if (sscanf(buf, "%15s %lf", cmd, &freq) == 2) {
+            log(LOG_INFO, "[control] Parsed command: %s %.3f\n", cmd, freq);
+            if (!strcmp(cmd, "lock")) {
+                lock_freq(freq);
+            } else if (!strcmp(cmd, "unlock")) {
+                unlock_freq(freq);
+            } else {
+                log(LOG_WARNING, "[control] Unknown command: %s\n", cmd);
+            }
+        } else {
+            log(LOG_WARNING, "[control] Failed to parse command: '%s'\n", buf);
+        }
+    }
+
+    close(fd);
+    if (dummy_fd >= 0) close(dummy_fd);
+
+    return NULL;
+}
+
+
 void* controller_thread(void* params) {
     device_t* dev = (device_t*)params;
     int i = 0;
@@ -113,8 +256,14 @@ void* controller_thread(void* params) {
             if (consecutive_squelch_off < 10) {
                 consecutive_squelch_off++;
             } else {
-                i++;
-                i %= dev->channels[0].freq_count;
+                int start_i = i;
+                do {
+                    i = (i + 1) % dev->channels[0].freq_count;
+                    double freq_mhz = dev->channels[0].freqlist[i].frequency / 1e6;
+                    if (!is_locked(freq_mhz)) {
+                        break;
+                    }
+                } while (i != start_i);
                 dev->channels[0].freq_idx = i;
                 new_centerfreq = dev->channels[0].freqlist[i].frequency + 20 * (double)(dev->input->sample_rate / fft_size);
                 if (input_set_centerfreq(dev->input, new_centerfreq) < 0) {
@@ -828,6 +977,12 @@ int main(int argc, char* argv[]) {
         }
         if (root.exists("localtime") && (bool)root["localtime"] == true)
             use_localtime = true;
+        if (root.exists("control_path"))
+            global_control_path = strdup(root["control_path"]);
+        if (global_control_path) {
+            pthread_t ctl_thread;
+            pthread_create(&ctl_thread, NULL, command_listener, (void*)global_control_path);
+        }
         if (root.exists("multiple_demod_threads") && (bool)root["multiple_demod_threads"] == true) {
 #ifdef WITH_BCM_VC
             cerr << "Using multiple_demod_threads not supported with BCM VideoCore for FFT\n";

@@ -354,6 +354,7 @@ void* output_thread(void* params);
 
 // rtl_airband.cpp
 extern bool use_localtime;
+extern char* global_control_path;
 extern bool multiple_demod_threads;
 extern bool multiple_output_threads;
 extern char* stats_filepath;
