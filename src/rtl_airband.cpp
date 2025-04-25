@@ -172,7 +172,6 @@ void* command_listener(void* path_str) {
 
     log(LOG_INFO, "[control] Opening FIFO: %s\n", fifo_path);
 
-    // Створення FIFO, якщо його не існує
     struct stat st;
     if (stat(fifo_path, &st) == -1) {
         mode_t old_umask = umask(0);
