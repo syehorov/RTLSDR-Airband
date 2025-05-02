@@ -141,10 +141,7 @@ void lock_freq(double freq_mhz) {
         } else {
             log(LOG_WARNING, "[lock] Cannot lock %.3f MHz — lock table is full\n", freq_mhz);
         }
-    } else {
-        log(LOG_DEBUG, "[lock] Frequency %.3f MHz was already locked\n", freq_mhz);
-    }
-
+    } 
     pthread_mutex_unlock(&lock_mutex);
 }
 
@@ -160,9 +157,6 @@ void unlock_freq(double freq_mhz) {
             log(LOG_INFO, "[unlock] Frequency %.3f MHz has been unlocked\n", freq_mhz);
             break;
         }
-    }
-    if (!found) {
-        log(LOG_DEBUG, "[unlock] Frequency %.3f MHz was not locked\n", freq_mhz);
     }
     pthread_mutex_unlock(&lock_mutex);
 }
