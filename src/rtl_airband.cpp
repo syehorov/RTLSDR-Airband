@@ -141,10 +141,7 @@ void lock_freq(double freq_mhz) {
         } else {
             log(LOG_WARNING, "[lock] Cannot lock %.3f MHz — lock table is full\n", freq_mhz);
         }
-    } else {
-        log(LOG_DEBUG, "[lock] Frequency %.3f MHz was already locked\n", freq_mhz);
-    }
-
+    } 
     pthread_mutex_unlock(&lock_mutex);
 }
 
@@ -161,9 +158,6 @@ void unlock_freq(double freq_mhz) {
             break;
         }
     }
-    if (!found) {
-        log(LOG_DEBUG, "[unlock] Frequency %.3f MHz was not locked\n", freq_mhz);
-    }
     pthread_mutex_unlock(&lock_mutex);
 }
 
@@ -172,7 +166,6 @@ void* command_listener(void* path_str) {
 
     log(LOG_INFO, "[control] Opening FIFO: %s\n", fifo_path);
 
-    // Створення FIFO, якщо його не існує
     struct stat st;
     if (stat(fifo_path, &st) == -1) {
         mode_t old_umask = umask(0);

@@ -149,9 +149,9 @@ struct file_data {
     timeval last_write_time;
     FILE* f;
     enum output_type type;
-    float max_rec_length;
-    float min_rec_length;
-    float max_idle_length;
+    double max_rec_length;
+    double min_rec_length;
+    double max_idle_length;
     int frequency;
 };
 

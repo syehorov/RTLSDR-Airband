@@ -124,13 +124,11 @@ static int parse_outputs(libconfig::Setting& outs, channel_t* channel, int i, in
             fdata->append_end_time = outs[o].exists("append_end_time") ? (bool)(outs[o]["append_end_time"]) : false;
             fdata->end_timestamp_format = outs[o].exists("end_timestamp_format") ? (outs[o]["end_timestamp_format"]) : " TO %H-%M-%S";
             fdata->include_freq = outs[o].exists("include_freq") ? (bool)(outs[o]["include_freq"]) : false;
-            fdata->min_rec_length = outs[o].exists("min_rec_length") ? (float)(outs[o]["min_rec_length"]) : 1.0;
-            fdata->max_rec_length = outs[o].exists("max_rec_length") ? (float)(outs[o]["max_rec_length"]) : 3600.0;
-            fdata->max_idle_length = outs[o].exists("max_idle_length") ? (float)(outs[o]["max_idle_length"]) : 0.5;
+            fdata->min_rec_length = outs[o].exists("min_rec_length") ? (double)(outs[o]["min_rec_length"]) : 1.0;
+            fdata->max_rec_length = outs[o].exists("max_rec_length") ? (double)(outs[o]["max_rec_length"]) : 3600.0;
+            fdata->max_idle_length = outs[o].exists("max_idle_length") ? (double)(outs[o]["max_idle_length"]) : 0.5;
             fdata->delete_short_records = outs[o].exists("delete_short_records") ? (bool)(outs[o]["delete_short_records"]) : false;
-
             channel->outputs[oo].has_mp3_output = true;
-
 
             if (fdata->split_on_transmission) {
                 if (parsing_mixers) {
@@ -163,13 +161,16 @@ static int parse_outputs(libconfig::Setting& outs, channel_t* channel, int i, in
             fdata->dated_subdirectories = outs[o].exists("dated_subdirectories") ? (bool)(outs[o]["dated_subdirectories"]) : false;
             fdata->dated_subdir_format = outs[o].exists("dated_subdir_format") ? (outs[o]["dated_subdir_format"]) : "%d-%m-%y";
             fdata->suffix = ".cf32";
-
             fdata->continuous = outs[o].exists("continuous") ? (bool)(outs[o]["continuous"]) : false;
             fdata->append = (!outs[o].exists("append")) || (bool)(outs[o]["append"]);
             fdata->split_on_transmission = outs[o].exists("split_on_transmission") ? (bool)(outs[o]["split_on_transmission"]) : false;
             fdata->append_end_time = outs[o].exists("append_end_time") ? (bool)(outs[o]["append_end_time"]) : false;
             fdata->end_timestamp_format = outs[o].exists("end_timestamp_format") ? (outs[o]["end_timestamp_format"]) : " TO %H-%M-%S";
             fdata->include_freq = outs[o].exists("include_freq") ? (bool)(outs[o]["include_freq"]) : false;
+            fdata->min_rec_length = outs[o].exists("min_rec_length") ? (double)(outs[o]["min_rec_length"]) : 1.0;
+            fdata->max_rec_length = outs[o].exists("max_rec_length") ? (double)(outs[o]["max_rec_length"]) : 3600.0;
+            fdata->max_idle_length = outs[o].exists("max_idle_length") ? (double)(outs[o]["max_idle_length"]) : 0.5;
+            fdata->delete_short_records = outs[o].exists("delete_short_records") ? (bool)(outs[o]["delete_short_records"]) : false;            
             channel->needs_raw_iq = channel->has_iq_outputs = 1;
 
             if (fdata->continuous && fdata->split_on_transmission) {
