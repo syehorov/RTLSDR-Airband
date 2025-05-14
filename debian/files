@@ -1,0 +1,3 @@
+rtlsdr-airband-dbgsym_5.1.1-1_riscv64.ddeb debug optional automatic=yes
+rtlsdr-airband_5.1.1-1_riscv64.buildinfo utils optional
+rtlsdr-airband_5.1.1-1_riscv64.deb utils optional

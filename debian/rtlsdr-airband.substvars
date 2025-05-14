@@ -1,0 +1,3 @@
+shlibs:Depends=libc6 (>= 2.38), libconfig++9v5 (>= 1.5-0.4~), libfftw3-single3 (>= 3.3.10), libgcc-s1 (>= 3.4), libmp3lame0 (>= 3.100), librtlsdr2 (>= 2.0.1), libshout3 (>= 2.4.6), libsoapysdr0.8 (>= 0.8.1), libstdc++6 (>= 13.1)
+misc:Depends=
+misc:Pre-Depends=

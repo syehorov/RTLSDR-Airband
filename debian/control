@@ -1,0 +1,13 @@
+Source: rtlsdr-airband
+Section: utils
+Priority: optional
+Maintainer: Serhii Yehorov <s.yegorov@gmail.com>
+Build-Depends: debhelper-compat (= 13), cmake, g++, librtlsdr-dev, libsoapysdr-dev, libconfig++-dev, libshout-dev
+Standards-Version: 4.6.2
+Homepage: https://github.com/syehorov/RTLSDR-Airband
+Rules-Requires-Root: no
+
+Package: rtlsdr-airband
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: RTLSDR-Airband fork with some changes and improvements

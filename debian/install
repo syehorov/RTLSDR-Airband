@@ -1,0 +1,4 @@
+obj-x86_64-linux-gnu/src/rtl_airband usr/bin
+debian/rtlsdr-airband@.service lib/systemd/system
+debian/example.conf etc/rtlsdr-airband
+config/*.conf usr/share/doc/rtlsdr-airband/examples

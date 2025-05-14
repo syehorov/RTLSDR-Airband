@@ -1,0 +1,14 @@
+#!/usr/bin/make -f
+
+export DEB_HOST_ARCH
+
+%:
+	dh $@ --buildsystem=cmake
+
+override_dh_auto_configure:
+	dh_auto_configure -- \
+		-DNFM=ON \
+		-DMIRISDR=OFF \
+		-DPULSEAUDIO=OFF \
+		$(if $(filter $(DEB_HOST_ARCH),riscv64),-DPLATFORM=generic)
+
