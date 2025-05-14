@@ -674,7 +674,7 @@ void disable_device_outputs(device_t* dev) {
 }
 
 static void print_channel_metric(FILE* f, char const* name, float freq, char* label) {
-    fprintf(f, "%s{freq=\"%.3f\"", name, freq / 1000000.0);
+    fprintf(f, "%s{freq=\"%.4f\"", name, freq / 1000000.0);
     if (label != NULL) {
         fprintf(f, ",label=\"%s\"", label);
     }
@@ -692,7 +692,7 @@ static void output_channel_noise_levels(FILE* f) {
             channel_t* channel = devices[i].channels + j;
             for (int k = 0; k < channel->freq_count; k++) {
                 print_channel_metric(f, "channel_noise_level", channel->freqlist[k].frequency, channel->freqlist[k].label);
-                fprintf(f, "\t%.3f\n", channel->freqlist[k].squelch.noise_level());
+                fprintf(f, "\t%.4f\n", channel->freqlist[k].squelch.noise_level());
             }
         }
     }
@@ -710,7 +710,7 @@ static void output_channel_dbfs_noise_levels(FILE* f) {
             channel_t* channel = devices[i].channels + j;
             for (int k = 0; k < channel->freq_count; k++) {
                 print_channel_metric(f, "channel_dbfs_noise_level", channel->freqlist[k].frequency, channel->freqlist[k].label);
-                fprintf(f, "\t%.3f\n", level_to_dBFS(channel->freqlist[k].squelch.noise_level()));
+                fprintf(f, "\t%.4f\n", level_to_dBFS(channel->freqlist[k].squelch.noise_level()));
             }
         }
     }
@@ -728,7 +728,7 @@ static void output_channel_signal_levels(FILE* f) {
             channel_t* channel = devices[i].channels + j;
             for (int k = 0; k < channel->freq_count; k++) {
                 print_channel_metric(f, "channel_signal_level", channel->freqlist[k].frequency, channel->freqlist[k].label);
-                fprintf(f, "\t%.3f\n", channel->freqlist[k].squelch.signal_level());
+                fprintf(f, "\t%.4f\n", channel->freqlist[k].squelch.signal_level());
             }
         }
     }
@@ -746,7 +746,7 @@ static void output_channel_dbfs_signal_levels(FILE* f) {
             channel_t* channel = devices[i].channels + j;
             for (int k = 0; k < channel->freq_count; k++) {
                 print_channel_metric(f, "channel_dbfs_signal_level", channel->freqlist[k].frequency, channel->freqlist[k].label);
-                fprintf(f, "\t%.3f\n", level_to_dBFS(channel->freqlist[k].squelch.signal_level()));
+                fprintf(f, "\t%.4f\n", level_to_dBFS(channel->freqlist[k].squelch.signal_level()));
             }
         }
     }
@@ -764,7 +764,7 @@ static void output_channel_squelch_levels(FILE* f) {
             channel_t* channel = devices[i].channels + j;
             for (int k = 0; k < channel->freq_count; k++) {
                 print_channel_metric(f, "channel_squelch_level", channel->freqlist[k].frequency, channel->freqlist[k].label);
-                fprintf(f, "\t%.3f\n", channel->freqlist[k].squelch.squelch_level());
+                fprintf(f, "\t%.4f\n", channel->freqlist[k].squelch.squelch_level());
             }
         }
     }

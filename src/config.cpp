@@ -260,7 +260,7 @@ static int parse_outputs(libconfig::Setting& outs, channel_t* channel, int i, in
                     error();
                 }
                 char buf[1024];
-                snprintf(buf, sizeof(buf), "%.3f MHz", (float)channel->freqlist[0].frequency / 1000000.0f);
+                snprintf(buf, sizeof(buf), "%.4f MHz", (float)channel->freqlist[0].frequency / 1000000.0f);
                 pdata->stream_name = strdup(buf);
             }
 #endif /* WITH_PULSEAUDIO */
@@ -302,7 +302,7 @@ static void warn_if_freq_not_in_range(int devidx, int chanidx, int freq, int cen
     static const float soft_bw_threshold = 0.9f;
     float bw_limit = (float)sample_rate / 2.f * soft_bw_threshold;
     if ((float)abs(freq - centerfreq) >= bw_limit) {
-        log(LOG_WARNING, "Warning: dev[%d].channel[%d]: frequency %.3f MHz is outside of SDR operating bandwidth (%.3f-%.3f MHz)\n", devidx, chanidx, (double)freq / 1e6,
+        log(LOG_WARNING, "Warning: dev[%d].channel[%d]: frequency %.4f MHz is outside of SDR operating bandwidth (%.4f-%.4f MHz)\n", devidx, chanidx, (double)freq / 1e6,
             (double)(centerfreq - bw_limit) / 1e6, (double)(centerfreq + bw_limit) / 1e6);
     }
 }

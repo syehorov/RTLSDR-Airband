@@ -137,9 +137,9 @@ void lock_freq(double freq_mhz) {
     if (!already_locked) {
         if (locked_freqs_count < MAX_LOCKED_FREQS) {
             locked_freqs[locked_freqs_count++] = freq_mhz;
-            log(LOG_INFO, "[lock] Frequency %.3f MHz has been locked\n", freq_mhz);
+            log(LOG_INFO, "[lock] Frequency %.4f MHz has been locked\n", freq_mhz);
         } else {
-            log(LOG_WARNING, "[lock] Cannot lock %.3f MHz — lock table is full\n", freq_mhz);
+            log(LOG_WARNING, "[lock] Cannot lock %.4f MHz — lock table is full\n", freq_mhz);
         }
     } 
     pthread_mutex_unlock(&lock_mutex);
@@ -154,9 +154,12 @@ void unlock_freq(double freq_mhz) {
                 locked_freqs[j] = locked_freqs[j + 1];
             locked_freqs_count--;
             found = 1;
-            log(LOG_INFO, "[unlock] Frequency %.3f MHz has been unlocked\n", freq_mhz);
+            log(LOG_INFO, "[unlock] Frequency %.4f MHz has been unlocked\n", freq_mhz);
             break;
         }
+    }
+    if(!found){
+        log(LOG_WARNING, "[unlock] Frequency %.4f was not locked", freq_mhz);
     }
     pthread_mutex_unlock(&lock_mutex);
 }
@@ -214,7 +217,7 @@ void* command_listener(void* path_str) {
         char cmd[16];
         double freq;
         if (sscanf(buf, "%15s %lf", cmd, &freq) == 2) {
-            log(LOG_INFO, "[control] Parsed command: %s %.3f\n", cmd, freq);
+            log(LOG_INFO, "[control] Parsed command: %s %.4f\n", cmd, freq);
             if (!strcmp(cmd, "lock")) {
                 lock_freq(freq);
             } else if (!strcmp(cmd, "unlock")) {
@@ -266,7 +269,7 @@ void* controller_thread(void* params) {
         } else {
             if (consecutive_squelch_off == 10) {
                 if (log_scan_activity)
-                    log(LOG_INFO, "Activity on %7.3f MHz\n", dev->channels[0].freqlist[i].frequency / 1000000.0);
+                    log(LOG_INFO, "Activity on %7.4f MHz\n", dev->channels[0].freqlist[i].frequency / 1000000.0);
                 if (i != dev->last_frequency) {
                     // squelch has just opened on a new frequency - we might need to update outputs' metadata
                     gettimeofday(&tv, NULL);
@@ -797,7 +800,7 @@ void* demodulate(void* params) {
                     char symbol = fparms->squelch.signal_outside_filter() ? '~' : (char)channel->axcindicate;
                     if (dev->mode == R_SCAN) {
                         GOTOXY(0, device_num * 17 + dev->row + 3);
-                        printf("%4.0f/%3.0f%c %7.3f ", level_to_dBFS(fparms->squelch.signal_level()), level_to_dBFS(fparms->squelch.noise_level()), symbol,
+                        printf("%4.0f/%3.0f%c %7.4f ", level_to_dBFS(fparms->squelch.signal_level()), level_to_dBFS(fparms->squelch.noise_level()), symbol,
                                (dev->channels[0].freqlist[channel->freq_idx].frequency / 1000000.0));
                     } else {
                         GOTOXY(i * 10, device_num * 17 + dev->row + 3);
@@ -1178,7 +1181,7 @@ int main(int argc, char* argv[]) {
         for (int i = 0; i < device_count; i++) {
             GOTOXY(0, i * 17 + 1);
             for (int j = 0; j < devices[i].channel_count; j++) {
-                printf(" %7.3f  ", devices[i].channels[j].freqlist[devices[i].channels[j].freq_idx].frequency / 1000000.0);
+                printf(" %7.4f  ", devices[i].channels[j].freqlist[devices[i].channels[j].freq_idx].frequency / 1000000.0);
             }
             if (i != device_count - 1) {
                 GOTOXY(0, i * 17 + 16);
