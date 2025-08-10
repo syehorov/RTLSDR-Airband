@@ -463,11 +463,9 @@ static bool output_file_ready(channel_t* channel, output_t* output) {
     std::stringstream ss;
     ss << output_dir << '/' << fdata->basename;
     fdata->file_path = ss.str();
-    //code from sdr++ recorder plugin, I like the way it works
-    float float_freq = static_cast<float>(channel->freqlist[channel->freq_idx].frequency);
     fdata->recording_frequency = channel->freqlist[channel->freq_idx].frequency;
     fdata->frequency = fdata->recording_frequency;
-
+    //code from sdr++ recorder plugin, I like the way it works
     char freqStr[128];
     char mfreqStr[128];
     char kfreqStr[128];
