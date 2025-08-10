@@ -465,7 +465,8 @@ static bool output_file_ready(channel_t* channel, output_t* output) {
     fdata->file_path = ss.str();
     //code from sdr++ recorder plugin, I like the way it works
     float float_freq = static_cast<float>(channel->freqlist[channel->freq_idx].frequency);
-    fdata->frequency = channel->freqlist[channel->freq_idx].frequency;
+    fdata->recording_frequency = channel->freqlist[channel->freq_idx].frequency;
+    fdata->frequency = fdata->recording_frequency;
 
     char freqStr[128];
     char mfreqStr[128];
@@ -477,9 +478,10 @@ static bool output_file_ready(channel_t* channel, output_t* output) {
     char monStr[128];
     char lyearStr[128];
     char syearStr[128];
-    sprintf(freqStr, "%.0lf", float_freq);
-    sprintf(kfreqStr, "%.4lf", float_freq / 1000);
-    sprintf(mfreqStr, "%.4lf", float_freq / 1000000);
+    float f_record = static_cast<float>(fdata->recording_frequency);
+    sprintf(freqStr, "%.0lf", f_record);
+    sprintf(kfreqStr, "%.4lf", f_record / 1000);
+    sprintf(mfreqStr, "%.4lf", f_record / 1000000);
     sprintf(hourStr, "%02d", time->tm_hour);
     sprintf(minStr, "%02d", time->tm_min);
     sprintf(secStr, "%02d", time->tm_sec);

@@ -152,6 +152,7 @@ struct file_data {
     double max_rec_length;
     double min_rec_length;
     double max_idle_length;
+    uint64_t recording_frequency;
     int frequency;
 };
 
