@@ -272,9 +272,9 @@ void* controller_thread(void* params) {
                     log(LOG_INFO, "Activity on %7.4f MHz\n", dev->channels[0].freqlist[i].frequency / 1000000.0);
                 if (i != dev->last_frequency) {
                     // squelch has just opened on a new frequency - we might need to update outputs' metadata
+                    dev->last_frequency = i;
                     gettimeofday(&tv, NULL);
                     tag_queue_put(dev, i, tv);
-                    dev->last_frequency = i;
                 }
             }
             consecutive_squelch_off = 0;
