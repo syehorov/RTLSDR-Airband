@@ -1,5 +1,5 @@
 Source: rtlsdr-airband
-Section: utils
+Section: hamradio
 Priority: optional
 Maintainer: Serhii Yehorov <s.yegorov@gmail.com>
 Build-Depends: debhelper-compat (= 13), cmake, g++, librtlsdr-dev, libsoapysdr-dev, libconfig++-dev, libshout-dev, libmp3lame-dev, libfftw3-dev
