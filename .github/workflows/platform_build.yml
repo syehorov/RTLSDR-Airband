@@ -13,21 +13,58 @@ jobs:
   platform_build:
     strategy:
       matrix:
-        # os: [ rpi3b ]
-        os: [ ubuntu-22.04-arm ]
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 35 # runtime across all OSs, runs can get queued
+        include:
+          - runner: pi_3b
+            platform: rpiv2
+            sudo: true
+            uv_cmd: ~/.local/bin/uv
+            test_output_dir: /test_data
+          - runner: pi_4b
+            platform: native
+            sudo: false
+            uv_cmd: ~/.local/bin/uv
+            test_output_dir: /test_data
+          - runner: ubuntu-22.04-arm
+            platform: native
+            sudo: false
+            uv_cmd: uv
+            test_output_dir: ''
+
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 35
     steps:
     - name: Runner Info
       run: printenv | sort
 
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         fetch-depth: '0' # need full history to get version from git tag
+
+    - name: Install uv
+      if: matrix.uv_cmd == 'uv'
+      uses: astral-sh/setup-uv@v8.1.0
 
     - name: Install packaged dependencies
       run: .github/install_dependencies
 
-    - name: Configure Build and Test
-      run: .github/platform_build ${{ matrix.os }}
+    - name: Build
+      run: |
+        cmake -B builds/Release -DCMAKE_BUILD_TYPE=Release -DPLATFORM=${{ matrix.platform }} -DBUILD_UNITTESTS=TRUE -S .
+        VERBOSE=1 cmake --build builds/Release -j
+
+    - name: Unit Tests
+      run: builds/Release/src/unittests
+
+    - name: Run system tests
+      env:
+        SUDO_FLAG: ${{ matrix.sudo == true && '--sudo' || '' }}
+        TEST_OUTPUT_DIR: ${{ matrix.test_output_dir }}
+      run: |
+        ${{ matrix.uv_cmd }} run --no-group dev pytest system_tests/tests/ \
+          --binary builds/Release/src/rtl_airband \
+          $SUDO_FLAG \
+          ${TEST_OUTPUT_DIR:+--test-output-dir=$TEST_OUTPUT_DIR} \
+          --mode thorough \
+          --clean \
+          -v

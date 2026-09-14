@@ -29,6 +29,9 @@
 #ifdef WITH_BCM_VC
 #include "hello_fft/gpu_fft.h"
 #include "hello_fft/mailbox.h"
+#else
+#include <memory>
+#include <vector>
 #endif /* WITH_BCM_VC */
 
 #include <fcntl.h>
@@ -124,7 +127,7 @@ void* controller_thread(void* params) {
         } else {
             if (consecutive_squelch_off == 10) {
                 if (log_scan_activity)
-                    log(LOG_INFO, "Activity on %7.3f MHz\n", dev->channels[0].freqlist[i].frequency / 1000000.0);
+                    log(LOG_INFO, "Activity on %7.3f MHz (%s)\n", dev->channels[0].freqlist[i].frequency / 1000000.0, dev->channels[0].freqlist[i].label);
                 if (i != dev->last_frequency) {
                     // squelch has just opened on a new frequency - we might need to update outputs' metadata
                     gettimeofday(&tv, NULL);
@@ -349,9 +352,10 @@ void* demodulate(void* params) {
     // blackman 7
     // the whole matrix is computed
 #ifdef WITH_BCM_VC
+    // TODO: change this to std::vector<float> ?
     float ALIGNED32 window[fft_size * 2];
 #else
-    float ALIGNED32 window[fft_size];
+    std::unique_ptr<float[], decltype(&fftwf_free)> window(fftwf_alloc_real(fft_size), fftwf_free);
 #endif /* WITH_BCM_VC */
 
     const double a0 = 0.27105140069342f;
@@ -405,7 +409,6 @@ void* demodulate(void* params) {
         if (dev->input->state != INPUT_RUNNING) {
             if (dev->input->state == INPUT_FAILED) {
                 dev->input->state = INPUT_DISABLED;
-                disable_device_outputs(dev);
                 devices_running--;
             }
             device_num = next_device(demod_params, device_num);
@@ -1122,11 +1125,6 @@ int main(int argc, char* argv[]) {
     }
     log(LOG_INFO, "Input threads closed\n");
 
-    for (int i = 0; i < device_count; i++) {
-        device_t* dev = devices + i;
-        disable_device_outputs(dev);
-    }
-
     if (mixer_count > 0) {
         log(LOG_INFO, "Closing mixer thread\n");
         pthread_join(mixer, NULL);
@@ -1136,6 +1134,11 @@ int main(int argc, char* argv[]) {
     for (int i = 0; i < output_thread_count; i++) {
         output_params[i].mp3_signal->send();
         pthread_join(output_threads[i], NULL);
+    }
+
+    for (int i = 0; i < device_count; i++) {
+        device_t* dev = devices + i;
+        disable_device_outputs(dev);
     }
 
     for (int i = 0; i < device_count; i++) {

@@ -16,9 +16,6 @@ if(CXX_HAS_PTHREAD)
 endif()
 
 CHECK_CXX_COMPILER_FLAG(-ffast-math CXX_HAS_FFAST_MATH)
-if(CXX_HAS_FFAST_MATH)
-    add_compile_options(-ffast-math)
-endif()
 
 # asprintf on MacOS
 if(APPLE)
@@ -218,17 +215,13 @@ else()
 	message(FATAL_ERROR "Unknown platform '${PLATFORM}'. Valid options are: rpiv2, native, and generic")
 endif()
 
-# Try using VC GPU if enabled. Fallback to fftw3f if disabled or if VC lib not found
+# Try using VC GPU if enabled. Fallback to fftw3f if disabled.
 if(BCM_VC)
-	find_package(BCM_VC)
-	if(BCM_VC_FOUND)
-		add_subdirectory(hello_fft)
-		list(APPEND rtl_airband_obj_files $<TARGET_OBJECTS:hello_fft>)
-		list(APPEND rtl_airband_extra_libs ${BCM_VC_LIBRARIES})
-		set(WITH_BCM_VC TRUE)
-	endif()
+	add_subdirectory(hello_fft)
+	list(APPEND rtl_airband_obj_files $<TARGET_OBJECTS:hello_fft>)
+	set(WITH_BCM_VC TRUE)
 endif()
-if(NOT BCM_VC_FOUND)
+if(NOT BCM_VC)
 	pkg_check_modules(FFTW3F REQUIRED fftw3f)
 	if(FFTW3F_FOUND)
 		list(APPEND rtl_airband_extra_libs ${FFTW3F_LIBRARIES})
@@ -305,6 +298,10 @@ target_include_directories (rtl_airband_base PUBLIC
 	${rtl_airband_include_dirs}
 )
 
+if(CXX_HAS_FFAST_MATH)
+    target_compile_options(rtl_airband_base PRIVATE -ffast-math)
+endif()
+
 # can't do this per target with cmake <3.13
 link_directories(${link_dirs})
 
@@ -333,7 +330,7 @@ install(TARGETS rtl_airband
 
 
 if(BUILD_UNITTESTS)
-	cmake_minimum_required(VERSION 3.14)
+	cmake_minimum_required(VERSION 3.1...3.18 FATAL_ERROR)
 
 	# GoogleTest requires at least C++14
 	set(CMAKE_CXX_STANDARD 14)
